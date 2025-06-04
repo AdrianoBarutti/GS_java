@@ -149,7 +149,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<finalName>docker-spring-boot</finalName>
+		<finalName>docker-stormguard-api</finalName>	
 	</build>
 
 </project>
