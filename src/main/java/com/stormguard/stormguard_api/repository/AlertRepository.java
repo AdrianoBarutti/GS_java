@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface AlertRepository extends JpaRepository<Alert, String> {
+public interface AlertRepository extends JpaRepository<Alert, Long> {
 
     @Query("""
         SELECT new com.stormguard.stormguard_api.dto.AlertResumoDTO(

@@ -6,9 +6,11 @@ import com.stormguard.stormguard_api.service.WeatherService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import java.util.List;
+
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
@@ -30,11 +32,20 @@ public class WeatherController {
         summary = "Cria um novo alerta",
         description = "Cria um novo alerta no banco de dados. Apenas usuários autenticados com role ADMIN podem criar alertas."
     )
-
     // CREATE
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<Alert> createAlert(@RequestBody Alert alert) {
+    public ResponseEntity<?> createAlert(@Valid @RequestBody Alert alert) {
+    // Define a data de envio como agora, se não estiver definida
+    if (alert.getSent() == null) {
+        alert.setSent(LocalDateTime.now());
+    }
+
+    // Validação adicional para lógica de datas
+    if (alert.getExpires().isBefore(alert.getEffective())) {
+        return ResponseEntity.badRequest().body("A data de expiração deve ser maior que a data de efetivação.");
+    }
+
         Alert savedAlert = weatherService.saveAlert(alert);
         return ResponseEntity.ok(savedAlert);
     }
@@ -43,7 +54,7 @@ public class WeatherController {
     @Tag(name = "Alertas")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/{id}")
-    public ResponseEntity<Alert> getAlertById(@PathVariable String id) {
+    public ResponseEntity<Alert> getAlertById(@PathVariable Long id) {
         Optional<Alert> alert = weatherService.getAlertById(id);
         return alert.map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.notFound().build());
@@ -53,7 +64,7 @@ public class WeatherController {
     @Tag(name = "Alertas")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<Alert> updateAlert(@PathVariable String id, @RequestBody Alert alert) {
+    public ResponseEntity<Alert> updateAlert(@PathVariable Long id, @RequestBody Alert alert) {
         Optional<Alert> updated = weatherService.updateAlert(id, alert);
         return updated.map(ResponseEntity::ok)
                       .orElseGet(() -> ResponseEntity.notFound().build());
@@ -63,7 +74,7 @@ public class WeatherController {
     @Tag(name = "Alertas")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAlert(@PathVariable String id) {
+    public ResponseEntity<Void> deleteAlert(@PathVariable Long id) {
         boolean deleted = weatherService.deleteAlert(id);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
@@ -127,7 +138,7 @@ public class WeatherController {
         summary = "Busca alertas da API externa",
         description = "Busca todos os alertas da API externa com filtros opcionais. Retorna uma lista de alertas filtrados por data, status, tipo de mensagem, evento, código, área, ponto, região, tipo de região, zona, urgência, severidade e certeza."
     )
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN')") 
     @GetMapping("/external")
     public ResponseEntity<?> getExternalAlerts(
             @RequestParam(required = false) String start,
@@ -158,7 +169,7 @@ public class WeatherController {
         summary = "Busca tipos de alerta",
         description = "Busca os tipos de alerta disponíveis na API externa. Retorna uma lista fixa de tipos de alerta, como 'Tornado', 'Severe Thunderstorm', etc."
     )
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/types")
     public ResponseEntity<?> getAlertTypes() {
         return ResponseEntity.ok(weatherService.getAlertTypes());

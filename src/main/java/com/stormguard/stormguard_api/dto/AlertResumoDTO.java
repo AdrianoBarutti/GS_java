@@ -2,7 +2,7 @@ package com.stormguard.stormguard_api.dto;
 
 
 public class AlertResumoDTO {
-    private String id;
+    private Long id;
     private String event;
     private String status;
     private String areaDesc;
@@ -10,7 +10,7 @@ public class AlertResumoDTO {
     private String urgency;
     private String certainty;
 
-    public AlertResumoDTO(String id, String event, String status, String areaDesc, String severity, String urgency, String certainty) {
+    public AlertResumoDTO(Long id, String event, String status, String areaDesc, String severity, String urgency, String certainty) {
         this.id = id;
         this.event = event;
         this.status = status;
@@ -20,7 +20,7 @@ public class AlertResumoDTO {
         this.certainty = certainty;
     }
 
-    public String getId() { return id; }
+    public Long getId() { return id; }
     public String getEvent() { return event; }
     public String getStatus() { return status; }
     public String getAreaDesc() { return areaDesc; }

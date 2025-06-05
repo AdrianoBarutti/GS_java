@@ -31,18 +31,18 @@ public class WeatherService {
         return alertRepository.save(alert);
     }
 
-    public Optional<Alert> getAlertById(String id) {
+    public Optional<Alert> getAlertById(Long id) {
         return alertRepository.findById(id);
     }
 
-    public Optional<Alert> updateAlert(String id, Alert alert) {
+    public Optional<Alert> updateAlert(Long id, Alert alert) {
         return alertRepository.findById(id).map(existing -> {
-            alert.setId(id);
+            alert.setId(existing.getId());
             return alertRepository.save(alert);
         });
     }
 
-    public boolean deleteAlert(String id) {
+    public boolean deleteAlert(Long id) {
         if (alertRepository.existsById(id)) {
             alertRepository.deleteById(id);
             return true;
@@ -129,7 +129,7 @@ public class WeatherService {
             for (JsonNode feature : features) {
                 JsonNode properties = feature.path("properties");
                 Alert alert = new Alert();
-                alert.setId(properties.path("id").asText());
+                alert.setId(null);
                 alert.setEvent(properties.path("event").asText());
                 alert.setStatus(properties.path("status").asText());
                 alert.setAreaDesc(properties.path("areaDesc").asText());

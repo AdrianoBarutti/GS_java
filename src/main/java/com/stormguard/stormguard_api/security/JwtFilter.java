@@ -27,28 +27,37 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
+
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             try {
+                // Extrai as claims do token
                 Claims claims = jwtUtil.extractClaims(token);
                 String username = claims.getSubject();
                 List<String> roles = claims.get("roles", List.class);
 
+                // Verifica se o usuário ainda não está autenticado
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     // Converte roles em GrantedAuthority
                     List<SimpleGrantedAuthority> authorities = roles.stream()
                             .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                             .toList();
 
+                    // Cria o objeto de autenticação
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(username, null, authorities);
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    // Define o contexto de segurança
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (Exception e) {
-                // Token inválido, não autentica
+                // Loga o erro e continua o fluxo sem autenticar
+                System.err.println("Erro ao validar token JWT: " + e.getMessage());
             }
         }
+
+        // Continua o fluxo do filtro
         filterChain.doFilter(request, response);
     }
 }

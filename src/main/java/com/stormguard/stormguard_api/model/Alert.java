@@ -1,7 +1,10 @@
 package com.stormguard.stormguard_api.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 
 import java.util.Set;
 import java.time.LocalDateTime;
@@ -9,49 +12,41 @@ import java.time.LocalDateTime;
 
 @Entity
 public class Alert {
-    @Id
-    @NotBlank
-    private String id;
 
-    @NotBlank
-    @Column(name = "event")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotNull(message = "O campo 'event' é obrigatório.")
     private String event;
 
-    @NotBlank
-    @Column(name = "status")
+    @NotNull(message = "O campo 'status' é obrigatório.")
     private String status;
 
-    @Column(name = "area_desc", columnDefinition = "TEXT")
+    @NotNull(message = "O campo 'areaDesc' é obrigatório.")
     private String areaDesc;
 
-    @NotBlank
+    @NotNull(message = "O campo 'urgency' é obrigatório.")
     private String urgency;
 
-    @NotBlank
-    @Column(name = "severity")
+    @NotNull(message = "O campo 'severity' é obrigatório.")
     private String severity;
 
-    @NotBlank
+    @NotNull(message = "O campo 'certainty' é obrigatório.")
     private String certainty;
 
-    @Column(name = "sent")
+    @PastOrPresent(message = "O campo 'sent' deve ser uma data no passado ou presente.")
     private LocalDateTime sent;
 
-    @Column(name = "effective")
+    @NotNull(message = "O campo 'effective' é obrigatório.")
     private LocalDateTime effective;
 
-    @Column(name = "expires")
+    @Future(message = "O campo 'expires' deve ser uma data no futuro.")
     private LocalDateTime expires;
 
-    @Column(name = "headline")
     private String headline;
-
-    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
-
-    @Column(name = "instruction", columnDefinition = "TEXT")
     private String instruction;
-
     @ManyToMany
     @JoinTable(
         name = "alert_area",
@@ -61,10 +56,10 @@ public class Alert {
     private Set<Area> areas;
 
     // Getters e Setters para os novos campos
-    public String getId() {
+    public Long getId() {
         return id;
     }
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
